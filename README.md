@@ -14,48 +14,76 @@ _Use GitHub Actions to publish your project to a Docker image._
 </header>
 
 <!--
-  <<< Author notes: Course start >>>
-  Include start button, a note about Actions minutes,
-  and tell the learner why they should take the course.
+  <<< Author notes: Step 1 >>>
+  Choose 3-5 steps for your course.
+  The first step is always the hardest, so pick something easy!
+  Link to docs.github.com for further explanations.
+  Encourage users to open new tabs for steps!
 -->
 
-## Welcome
+## Step 1: Create the workflow file
 
-GitHub Actions makes it easier than ever to incorporate continuous delivery (CD) into your repositories. This course will teach you what is needed to test and deliver artifacts that are ready for deployment.
+_Welcome to "Publish packages"! :wave:_
 
-- **Who is this for**: Developers, DevOps engineers, full stack developers, cloud engineers.
-- **What you'll learn**: Continuous delivery, how to save and access build artifacts, package management, how to publish to GitHub Packages.
-- **What you'll build**: We will build a Docker image that runs a small game.
-- **Prerequisites**: We recommend you first complete the following courses: [Hello, GitHub Actions](https://github.com/skills/hello-github-actions) and [Continuous Integration](https://github.com/skills/continuous-integration).
-- **How long**: This course takes less than 30 minutes to complete.
+First, take a moment to examine the image below. It shows the relationship between _continuous integration_, _continuous delivery_ and _continuous deployment_.
 
-In this course, you will:
+![](https://i.imgur.com/xZCkjmU.png)
 
-1. Create a workflow
-2. Add a Dockerfile
-3. Merge your pull request
+**Continuous integration** (CI) is a practice where developers integrate tested code into a shared branch several times per day. **Continuous delivery** (CD) is the next phase of **continuous integration** (CI) where we also make sure to package the code in a _release_ and store it somewhere - preferably, in an artifact repository. Lastly, **Continuous deployment** (CD) takes **continuous delivery** (CD) to the next level by directly deploying our releases to the world.
 
-### How to start this course
+[**Docker**](https://www.docker.com/why-docker) is an engine that allows you to run containers.
+Containers are packages of software that can run reliably in different environments. Containers include everything needed to run the application. Containers are lightweight in comparison to virtual machines. A **Dockerfile** is a text document that contains all the commands and instructions necessary to build a Docker Image. A **Docker image** is an executable package comprised of code, dependencies, libraries, a runtime, environment variables, and configuration files. A **Docker container** is a runtime instance of a Docker Image.
 
-<!-- For start course, run in JavaScript:
-'https://github.com/new?' + new URLSearchParams({
-  template_owner: 'skills',
-  template_name: 'publish-packages',
-  owner: '@me',
-  name: 'skills-publish-packages',
-  description: 'My clone repository',
-  visibility: 'public',
-}).toString()
--->
+We'll start by creating the workflow file to publish a Docker image to GitHub Packages.
 
-[![start-course](https://user-images.githubusercontent.com/1221423/235727646-4a590299-ffe5-480d-8cd5-8194ea184546.svg)](https://github.com/new?template_owner=skills&template_name=publish-packages&owner=%40me&name=skills-publish-packages&description=My+clone+repository&visibility=public)
+### :keyboard: Activity: Create the workflow file
 
-1. Right-click **Start course** and open the link in a new tab.
-2. In the new tab, most of the prompts will automatically fill in for you.
-   - For owner, choose your personal account or an organization to host the repository.
-   - We recommend creating a public repository, as private repositories will [use Actions minutes](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions).
-   - Scroll down and click the **Create repository** button at the bottom of the form.
-3. After your new repository is created, wait about 20 seconds, then refresh the page. Follow the step-by-step instructions in the new repository's README.
+1. Open a new browser tab, and work on the steps in your second tab while you read the instructions in this tab.
+1. Navigate to the **Code** tab.
+1. From the **main** branch dropdown, click on the **cd** branch.
+1. Navigate to the `.github/workflows/` folder, then select **Add file** and click on **Create new file**.
+1. In the **Name your file...** field, enter `publish.yml`.
+1. Add the following to the `publish.yml` file:
+   ```yml
+   name: Publish to Docker
+   on:
+     push:
+       branches:
+         - main
+   permissions:
+     packages: write
+     contents: read
+   jobs:
+     publish:
+       runs-on: ubuntu-latest
+       steps:
+         - name: Checkout
+           uses: actions/checkout@v4
+         # Add your test steps here if needed...
+         - name: Docker meta
+           id: meta
+           uses: docker/metadata-action@v5
+           with:
+             images: ghcr.io/YOURNAME/publish-packages/game
+             tags: type=sha
+         - name: Login to GHCR
+           uses: docker/login-action@v3
+           with:
+             registry: ghcr.io
+             username: ${{ github.repository_owner }}
+             password: ${{ secrets.GITHUB_TOKEN }}
+         - name: Build container
+           uses: docker/build-push-action@v5
+           with:
+             context: .
+             push: true
+             tags: ${{ steps.meta.outputs.tags }}
+   ```
+1. Replace `YOURNAME` with your username.
+1. Make sure that the image name is unique.
+1. Commit your changes.
+1. (optional) Create a pull request to view all the changes you'll make throughout this course. Click the **Pull Requests** tab, click **New pull request**, set `base: main` and `compare:cd`.
+1. Wait about 20 seconds then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
 
 <footer>
 
